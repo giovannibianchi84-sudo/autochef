@@ -17,7 +17,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- API CONFIG ---
-CHIAVE_API = "AIzaSyCSlGI0fD9_ntpeNkXnaiKLmj56ldzryMw"
+CHIAVE_API = st.secrets["CHIAVE_GOOGLE"]
 client = genai.Client(api_key=CHIAVE_API)
 
 # --- LOGICA DI RESET ---
