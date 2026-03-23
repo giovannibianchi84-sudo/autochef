@@ -35,8 +35,11 @@ with col2:
 esclusioni = st.text_input("Escludi (es: aglio, noci)")
 
 # --- FOTOCAMERA E CARICAMENTO ---
-st.write("### 📸 Scatta una foto")
-with st.expander("📸 Vuoi scattare una foto ora? Clicca qui"):
+st.write("### 📸 Opzioni Caricamento")
+attiva_camera = st.checkbox("Sblocca Fotocamera (clicca per scattare)")
+
+foto_scattata = None
+if attiva_camera:
     foto_scattata = st.camera_input("Inquadra gli ingredienti")
 
 st.write("### 📂 Oppure carica file")
