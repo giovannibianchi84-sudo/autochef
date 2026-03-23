@@ -72,7 +72,7 @@ if st.button("👨‍🍳 GENERA 3 RICETTE"):
             if immagini_per_gemini: contenuto.extend(immagini_per_gemini)
 
             try:
-                response = client.models.generate_content(model='gemini-2.0-flash', contents=contenuto)
+                response = client.models.generate_content(model='gemini-1.5-flash', contents=contenuto)
                 st.session_state.ricetta = response.text
             except Exception as e:
                 st.error(f"Errore: {e}")
