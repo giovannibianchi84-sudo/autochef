@@ -36,7 +36,8 @@ esclusioni = st.text_input("Escludi (es: aglio, noci)")
 
 # --- FOTOCAMERA E CARICAMENTO ---
 st.write("### 📸 Scatta una foto")
-foto_scattata = st.camera_input("Inquadra gli ingredienti")
+with st.expander("📸 Vuoi scattare una foto ora? Clicca qui"):
+    foto_scattata = st.camera_input("Inquadra gli ingredienti")
 
 st.write("### 📂 Oppure carica file")
 foto_galleria = st.file_uploader("Scegli dalla galleria", type=["jpg", "png"], accept_multiple_files=True)
