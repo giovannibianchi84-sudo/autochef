@@ -64,6 +64,7 @@ if st.button("👨‍🍳 GENERA 3 RICETTE"):
         with st.spinner("Lo Chef sta creando..."):
             prompt = f"""
 Sei uno Chef stellato Michelin e Sommelier esperto.
+REGOLA FONDAMENTALE: nel Procedimento usa ESCLUSIVAMENTE gli ingredienti elencati nella lista. Non aggiungere mai ingredienti non presenti nella lista.
 Analizza gli ingredienti forniti (testo e/o immagini) e crea esattamente 3 ricette diverse.
 
 Parametri:
