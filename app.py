@@ -36,7 +36,7 @@ esclusioni = st.text_input("Escludi (es: aglio, noci)")
 # --- CARICAMENTO IMMAGINI (unico elemento, propone camera o galleria su mobile) ---
 foto_galleria = st.file_uploader(
     "📸 Carica o scatta una foto",
-    type=["jpg", "jpeg", "png"],
+    type=["jpg", "png"],
     accept_multiple_files=True
 )
 
