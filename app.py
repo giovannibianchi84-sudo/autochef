@@ -36,10 +36,6 @@ esclusioni = st.text_input("Escludi (es: aglio, noci)")
 
 # --- FOTOCAMERA E CARICAMENTO ---
 st.write("### 📸 Opzioni Caricamento")
-attiva_camera = st.checkbox("Sblocca Fotocamera (clicca per scattare)")
-foto_scattata = None
-if attiva_camera:
-    foto_scattata = st.camera_input("Inquadra gli ingredienti")
 
 st.write("### 📂 Oppure carica file")
 
@@ -56,10 +52,6 @@ if foto_galleria and len(foto_galleria) > 5:
     foto_galleria = foto_galleria[:5]
 
 immagini_per_gemini = []
-
-if foto_scattata:
-    img_s = PIL.Image.open(foto_scattata).convert('RGB')
-    immagini_per_gemini.append(img_s)
 
 if foto_galleria:
     for f in foto_galleria:
