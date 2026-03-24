@@ -2,7 +2,6 @@ import streamlit as st
 from google import genai
 import PIL.Image
 from fpdf import FPDF
-import io
 
 # --- API CONFIG (SICUREZZA) ---
 CHIAVE_API = st.secrets["CHIAVE_GOOGLE"]
@@ -34,25 +33,18 @@ with col2:
 
 esclusioni = st.text_input("Escludi (es: aglio, noci)")
 
-# --- FOTOCAMERA E CARICAMENTO ---
-st.write("### 📸 Opzioni Caricamento")
-
-st.write("### 📂 Oppure carica file")
-
-# MIGLIORIA 3: limite massimo di 5 immagini
+# --- CARICAMENTO IMMAGINI (unico elemento, propone camera o galleria su mobile) ---
 foto_galleria = st.file_uploader(
-    "Scegli dalla galleria (max 5 foto)",
-    type=["jpg", "png"],
+    "📸 Carica o scatta una foto",
+    type=["jpg", "jpeg", "png"],
     accept_multiple_files=True
 )
 
-# Controllo limite immagini
 if foto_galleria and len(foto_galleria) > 5:
     st.warning("⚠️ Puoi caricare al massimo 5 immagini. Verranno usate solo le prime 5.")
     foto_galleria = foto_galleria[:5]
 
 immagini_per_gemini = []
-
 if foto_galleria:
     for f in foto_galleria:
         try:
@@ -60,7 +52,7 @@ if foto_galleria:
             img_g.thumbnail((800, 800))
             immagini_per_gemini.append(img_g)
         except Exception:
-            st.error(f"⚠️ Errore nel caricare l'immagine: {f.name}. Prova con un altro file.")
+            st.error(f"⚠️ Errore nel caricare l'immagine: {f.name}.")
 
 ingredienti_testo = st.text_area("O scrivi gli ingredienti qui:")
 
@@ -70,8 +62,6 @@ if st.button("👨‍🍳 GENERA 3 RICETTE"):
         st.warning("Aggiungi almeno una foto o un ingrediente!")
     else:
         with st.spinner("Lo Chef sta creando..."):
-
-            # MIGLIORIA 2: prompt più strutturato e dettagliato
             prompt = f"""
 Sei uno Chef stellato Michelin e Sommelier esperto.
 Analizza gli ingredienti forniti (testo e/o immagini) e crea esattamente 3 ricette diverse.
@@ -92,12 +82,10 @@ Per ciascuna ricetta usa ESATTAMENTE questo formato:
 ### Ingredienti
 - [ingrediente 1 con quantità]
 - [ingrediente 2 con quantità]
-...
 
 ### Procedimento
 1. [Passo 1]
 2. [Passo 2]
-...
 
 ### 🍷 Abbinamento Vino
 [Vino consigliato con breve spiegazione]
@@ -109,14 +97,12 @@ Per ciascuna ricetta usa ESATTAMENTE questo formato:
 
 ---
 """
-
             contenuto = [prompt]
             if ingredienti_testo:
                 contenuto.append(f"Ingredienti disponibili (testo): {ingredienti_testo}")
             if immagini_per_gemini:
                 contenuto.extend(immagini_per_gemini)
 
-            # MIGLIORIA 1+4: modello aggiornato + gestione errori specifica
             try:
                 response = client.models.generate_content(
                     model='gemini-2.5-flash',
@@ -129,9 +115,9 @@ Per ciascuna ricetta usa ESATTAMENTE questo formato:
                 if "429" in errore:
                     st.error("⏳ Hai raggiunto il limite di richieste gratuite. Aspetta qualche minuto e riprova.")
                 elif "404" in errore:
-                    st.error("❌ Modello non trovato. Controlla di usare 'gemini-2.5-flash'.")
+                    st.error("❌ Modello non trovato. Controlla il nome del modello.")
                 elif "400" in errore:
-                    st.error("⚠️ Richiesta non valida. Prova a ridurre il numero di immagini o la lunghezza del testo.")
+                    st.error("⚠️ Richiesta non valida. Prova a ridurre il numero di immagini.")
                 elif "500" in errore or "503" in errore:
                     st.error("🔧 Servizio Gemini temporaneamente non disponibile. Riprova tra poco.")
                 else:
@@ -142,39 +128,22 @@ if st.session_state.ricetta:
     st.markdown("---")
     st.markdown(st.session_state.ricetta)
 
-    # MIGLIORIA 1: PDF con supporto UTF-8 corretto
     try:
         pdf = FPDF()
         pdf.add_page()
         pdf.set_auto_page_break(auto=True, margin=15)
-
-        # Usa un font che supporta i caratteri italiani
         pdf.add_font("DejaVu", "", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", uni=True)
         pdf.set_font("DejaVu", size=11)
-
         for line in st.session_state.ricetta.split('\n'):
-            # Rimuove i simboli markdown dal PDF
             line_clean = line.replace("**", "").replace("##", "").replace("#", "").replace("---", "")
             pdf.multi_cell(0, 8, line_clean)
-
-        st.download_button(
-            "📄 Scarica PDF",
-            data=pdf.output(dest='S'),
-            file_name="ricette_autochef.pdf",
-            mime="application/pdf"
-        )
+        st.download_button("📄 Scarica PDF", data=bytes(pdf.output()), file_name="ricette_autochef.pdf", mime="application/pdf")
     except Exception:
-        # Fallback se il font DejaVu non è disponibile
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
         pdf.multi_cell(0, 10, st.session_state.ricetta.encode('latin-1', 'replace').decode('latin-1'))
-        st.download_button(
-            "📄 Scarica PDF",
-            data=pdf.output(dest='S'),
-            file_name="ricette_autochef.pdf",
-            mime="application/pdf"
-        )
+        st.download_button("📄 Scarica PDF", data=bytes(pdf.output()), file_name="ricette_autochef.pdf", mime="application/pdf")
 
     if st.button("🗑️ Nuova Ricetta"):
         st.session_state.ricetta = None
